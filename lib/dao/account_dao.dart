@@ -25,6 +25,7 @@ class AccountDao {
         "a.isDefault",
         "a.type",
         "a.description",
+        "a.goal",
         "SUM(CASE WHEN t.type='DR' AND t.account=a.id THEN t.amount END) as expense",
         "SUM(CASE WHEN t.type='CR' AND t.account=a.id THEN t.amount END) as income"
       ].join(",");

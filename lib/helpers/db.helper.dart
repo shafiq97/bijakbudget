@@ -18,7 +18,7 @@ Future<Database> getDBInstance() async {
       String databasesPath = await getDatabasesPath();
       String dbPath = join(databasesPath, 'database.db');
       db = await openDatabase(dbPath,
-          version: 6, onCreate: onCreate, onUpgrade: onUpgrade);
+          version: 7, onCreate: onCreate, onUpgrade: onUpgrade);
     }
 
     database = db;
@@ -30,7 +30,7 @@ Future<Database> getDBInstance() async {
 }
 
 typedef MigrationCallback = Function(Database database);
-List<MigrationCallback> migrations = [v1, v2, v3, v4, v5, v6];
+List<MigrationCallback> migrations = [v1, v2, v3, v4, v5, v6, v7];
 void onCreate(Database database, int version) async {
   for (MigrationCallback callback in migrations) {
     await callback(database);

@@ -240,6 +240,26 @@ class _AccountForm extends State<AccountForm> {
 
               Container(
                 padding: const EdgeInsets.only(bottom: 20),
+                child: TextFormField(
+                  decoration: const InputDecoration(
+                    labelText: 'Goal',
+                    hintText: 'Enter amount',
+                  ),
+                  keyboardType: const TextInputType.numberWithOptions(
+                      decimal: true), // Set keyboard type for decimal numbers
+                  initialValue:
+                      _account!.goal?.toString() ?? '', // Handle null value
+                  onChanged: (text) {
+                    setState(() {
+                      _account!.goal =
+                          double.tryParse(text); // Convert text to double
+                    });
+                  },
+                ),
+              ),
+
+              Container(
+                padding: const EdgeInsets.only(bottom: 20),
                 child: InkWell(
                   onTap: () => _selectDate(context),
                   child: InputDecorator(

@@ -65,3 +65,7 @@ void v6(Database database) async {
   await database.execute('ALTER TABLE accounts ADD COLUMN time STRING');
   await database.execute('ALTER TABLE accounts ADD COLUMN type STRING');
 }
+
+void v7(Database database) async {
+  await database.execute('ALTER TABLE accounts ADD COLUMN goal REAL');
+}
