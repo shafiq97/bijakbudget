@@ -42,7 +42,8 @@ class _AccountForm extends State<AccountForm> {
           holderName: widget.account!.holderName,
           accountNumber: widget.account!.accountNumber,
           icon: widget.account!.icon,
-          color: widget.account!.color);
+          color: widget.account!.color,
+          amount: widget.account!.amount);
     } else {
       _account = Account(
           name: "",
@@ -56,6 +57,13 @@ class _AccountForm extends State<AccountForm> {
   }
 
   void onSave(context) async {
+    _account!.amount = _account!.amount ?? 0.0;
+    _account!.category = _account!.category ?? 'Default Category';
+    _account!.description = _account!.description ?? 'No Description';
+    _account!.date = selectedDate; // Make sure the selectedDate is assigned
+    _account!.type =
+        selectedAccountType ?? 'Cash'; // Assign selected account type
+    _account!.balance = _account!.amount;
     await _accountDao.upsert(_account!);
     if (widget.onSave != null) {
       widget.onSave!();
