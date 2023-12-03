@@ -188,6 +188,28 @@ class _AccountsScreenState extends State<AccountsScreen> {
                                         fontFamily: context.monoFontFamily),
                                   )
                                 ],
+                              )),
+                              Expanded(
+                                  child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  const Text.rich(TextSpan(children: [
+                                    //TextSpan(text: "▲", style: TextStyle(color: ThemeColors.error)),
+                                    TextSpan(
+                                        text: "Net",
+                                        style: TextStyle(
+                                            fontSize: 12,
+                                            fontWeight: FontWeight.w600)),
+                                  ])),
+                                  CurrencyText(
+                                    account.income! - account.expense!,
+                                    style: TextStyle(
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.w700,
+                                        color: ThemeColors.info,
+                                        fontFamily: context.monoFontFamily),
+                                  )
+                                ],
                               ))
                             ],
                           )
