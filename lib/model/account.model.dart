@@ -50,7 +50,7 @@ class Account {
       expense: data["expense"],
       balance: data["balance"],
       amount: data["amount"], // Parse amount
-      category: data["category"].toString(), // Parse category
+      category: data["category"], // Parse category
       description: data["description"], // Parse description
       date: data["date"] != null
           ? DateTime.parse(data["date"])

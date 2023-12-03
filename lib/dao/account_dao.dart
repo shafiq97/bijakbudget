@@ -17,6 +17,7 @@ class AccountDao {
     if (withSummery) {
       String fields = [
         "a.id",
+        "a.category",
         "a.name",
         "a.holderName",
         "a.accountNumber",
@@ -26,6 +27,9 @@ class AccountDao {
         "a.type",
         "a.description",
         "a.goal",
+        "a.amount",
+        "a.balance",
+        "a.expense",
         "SUM(CASE WHEN t.type='DR' AND t.account=a.id THEN t.amount END) as expense",
         "SUM(CASE WHEN t.type='CR' AND t.account=a.id THEN t.amount END) as income"
       ].join(",");

@@ -77,6 +77,17 @@ class _AccountsScreenState extends State<AccountsScreen> {
             itemCount: _accounts.length,
             itemBuilder: (builder, index) {
               Account account = _accounts[index];
+              double progress = account.income != null &&
+                      account.goal != null &&
+                      account.income! > 0
+                  ? (account.income! - (account.expense ?? 0)) / account.goal!
+                  : 0.0;
+              progress = progress.isNegative
+                  ? 0.0
+                  : (progress > 1.0
+                      ? 1.0
+                      : progress); // Ensure progress is between 0 and 1
+              log("PROGRESS $progress");
               log(account.toJson().toString());
               GlobalKey accKey = GlobalKey();
               return Stack(
@@ -122,6 +133,30 @@ class _AccountsScreenState extends State<AccountsScreen> {
                                   ),
                                 ],
                               )
+                            ],
+                          ),
+                          const SizedBox(
+                            height: 20,
+                          ),
+                          Column(
+                            // Add this Column for the progress bar
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              // Add this Row for the progress bar
+                              Row(
+                                children: [
+                                  Expanded(
+                                    child: LinearProgressIndicator(
+                                      value: account.balance! /
+                                          account.goal!, // Progress value here
+                                      backgroundColor: Colors.grey[300],
+                                      valueColor: AlwaysStoppedAnimation<Color>(
+                                        Theme.of(context).primaryColor,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
                             ],
                           ),
                           const SizedBox(
@@ -196,13 +231,13 @@ class _AccountsScreenState extends State<AccountsScreen> {
                                   const Text.rich(TextSpan(children: [
                                     //TextSpan(text: "▲", style: TextStyle(color: ThemeColors.error)),
                                     TextSpan(
-                                        text: "Net",
+                                        text: "Goal",
                                         style: TextStyle(
                                             fontSize: 12,
                                             fontWeight: FontWeight.w600)),
                                   ])),
                                   CurrencyText(
-                                    account.income! - account.expense!,
+                                    account.goal,
                                     style: TextStyle(
                                         fontSize: 16,
                                         fontWeight: FontWeight.w700,
