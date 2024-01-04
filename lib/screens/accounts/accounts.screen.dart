@@ -4,6 +4,7 @@ import 'package:events_emitter/events_emitter.dart';
 import 'package:fintracker/dao/account_dao.dart';
 import 'package:fintracker/events.dart';
 import 'package:fintracker/extension.dart';
+import 'package:fintracker/helpers/currency.helper.dart';
 import 'package:fintracker/model/account.model.dart';
 import 'package:fintracker/theme/colors.dart';
 import 'package:fintracker/widgets/currency.dart';
@@ -37,6 +38,27 @@ class _AccountsScreenState extends State<AccountsScreen> {
   final AccountDao _accountDao = AccountDao();
   EventListener? _accountEventListener;
   List<Account> _accounts = [];
+
+  double calculateMonthlySavings(Account account) {
+    // Ensure goal is not null or zero, and balance is not null
+    final goal = account.goal ?? 0;
+    final balance = account.balance ?? 0;
+    if (goal <= 0 || balance >= goal) {
+      return 0; // No savings needed if goal is not positive or already met/exceeded
+    }
+
+    final currentDate = DateTime.now();
+    final endOfYear = DateTime(currentDate.year, 12, 31);
+    int monthsLeft = endOfYear.difference(currentDate).inDays ~/ 30;
+
+    // If no months left, set it to 1 to avoid division by 0
+    if (monthsLeft <= 0) {
+      monthsLeft = 1;
+    }
+
+    final savingsNeeded = goal - balance;
+    return savingsNeeded / monthsLeft; // Safe to divide now
+  }
 
   void loadData() async {
     List<Account> accounts = await _accountDao.find(withSummery: true);
@@ -147,8 +169,12 @@ class _AccountsScreenState extends State<AccountsScreen> {
                                 children: [
                                   Expanded(
                                     child: LinearProgressIndicator(
-                                      value: account.balance! /
-                                          account.goal!, // Progress value here
+                                      value: account.balance != null &&
+                                              (account.goal ?? 0) > 0
+                                          ? account.balance! /
+                                              (account.goal ??
+                                                  0) // Safe division
+                                          : 0.0,
                                       backgroundColor: Colors.grey[300],
                                       valueColor: AlwaysStoppedAnimation<Color>(
                                         Theme.of(context).primaryColor,
@@ -323,7 +349,42 @@ class _AccountsScreenState extends State<AccountsScreen> {
                         size: 20,
                       ),
                     ),
-                  )
+                  ),
+                  Positioned(
+                    right: 4,
+                    top: 4,
+                    child: Tooltip(
+                      message: 'Recommended monthly savings', // Tooltip message
+                      child: InkWell(
+                        onTap: () {
+                          final monthlySavings =
+                              calculateMonthlySavings(account);
+                          showDialog(
+                            context: context,
+                            builder: (BuildContext context) {
+                              return AlertDialog(
+                                title: const Text('Monthly Savings Needed'),
+                                content: Text(
+                                    'To reach your goal by the end of the year, you should save $monthlySavings per month.'),
+                                actions: <Widget>[
+                                  TextButton(
+                                    child: const Text('Close'),
+                                    onPressed: () {
+                                      Navigator.of(context).pop();
+                                    },
+                                  ),
+                                ],
+                              );
+                            },
+                          );
+                        },
+                        child: Icon(
+                          Icons.info_outline, // Info icon
+                          color: account.color,
+                        ),
+                      ),
+                    ),
+                  ),
                 ],
               );
             }),

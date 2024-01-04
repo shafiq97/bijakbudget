@@ -10,6 +10,29 @@ class AccountDao {
     return result;
   }
 
+  Future<double> getBalance(int accountId) async {
+    final db = await getDBInstance();
+
+    // SQL to calculate income and expenses for the specific account
+    String sql = '''
+    SELECT 
+      SUM(CASE WHEN type='CR' AND account=? THEN amount ELSE 0 END) as income,
+      SUM(CASE WHEN type='DR' AND account=? THEN amount ELSE 0 END) as expense
+    FROM payments WHERE account=?
+  ''';
+
+    List<Map> results =
+        await db.rawQuery(sql, [accountId, accountId, accountId]);
+
+    if (results.isNotEmpty) {
+      double income = results.first["income"] ?? 0.0;
+      double expense = (results.first["expense"] ?? 0).toDouble();
+      return income - expense; // The balance is income minus expenses
+    }
+
+    return 0.01; // Return 0.0 if no income or expenses are found for the account
+  }
+
   Future<List<Account>> find({bool withSummery = false}) async {
     final Database db = await getDBInstance();
 

@@ -4,6 +4,7 @@ import 'package:fintracker/theme/colors.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:in_app_notification/in_app_notification.dart';
 import 'package:month_year_picker/month_year_picker.dart';
 
 class App extends StatelessWidget {
@@ -62,19 +63,21 @@ class App extends StatelessWidget {
 
     return DynamicColorBuilder(
         builder: (ColorScheme? lightDynamic, ColorScheme? darkDynamic) {
-      return MaterialApp(
-        title: 'BijakBudget',
-        theme: _buildTheme(
-            brightness: Brightness.light, color: lightDynamic?.primary),
-        darkTheme: _buildTheme(
-            brightness: Brightness.dark, color: darkDynamic?.primary),
-        themeMode: isDarkMode ? ThemeMode.dark : ThemeMode.light,
-        home: const MainScreen(),
-        localizationsDelegates: const [
-          GlobalWidgetsLocalizations.delegate,
-          GlobalMaterialLocalizations.delegate,
-          MonthYearPickerLocalizations.delegate,
-        ],
+      return InAppNotification(
+        child: MaterialApp(
+          title: 'BijakBudget',
+          theme: _buildTheme(
+              brightness: Brightness.light, color: lightDynamic?.primary),
+          darkTheme: _buildTheme(
+              brightness: Brightness.dark, color: darkDynamic?.primary),
+          themeMode: isDarkMode ? ThemeMode.dark : ThemeMode.light,
+          home: const MainScreen(),
+          localizationsDelegates: const [
+            GlobalWidgetsLocalizations.delegate,
+            GlobalMaterialLocalizations.delegate,
+            MonthYearPickerLocalizations.delegate,
+          ],
+        ),
       );
     });
   }

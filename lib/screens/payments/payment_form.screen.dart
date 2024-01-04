@@ -5,6 +5,7 @@ import 'package:fintracker/dao/category_dao.dart';
 import 'package:fintracker/dao/payment_dao.dart';
 import 'package:fintracker/events.dart';
 import 'package:fintracker/extension.dart';
+import 'package:fintracker/main.dart';
 import 'package:fintracker/model/account.model.dart';
 import 'package:fintracker/model/category.model.dart';
 import 'package:fintracker/model/payment.model.dart';
@@ -14,8 +15,10 @@ import 'package:fintracker/widgets/dialog/account_form.dialog.dart';
 import 'package:fintracker/widgets/dialog/category_form.dialog.dart';
 import 'package:fintracker/widgets/buttons/button.dart';
 import 'package:fintracker/widgets/dialog/confirm.modal.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:in_app_notification/in_app_notification.dart';
 import 'package:intl/intl.dart';
 
 typedef OnCloseCallback = Function(Payment payment);
@@ -54,6 +57,33 @@ class _PaymentForm extends State<PaymentForm> {
   double _amount = 0;
   PaymentType _type = PaymentType.credit;
   DateTime _datetime = DateTime.now();
+
+  late final FirebaseMessaging _messaging;
+// Define a method to handle incoming FCM messages
+  Future<void> setupFirebaseNotifications() async {
+    _messaging = FirebaseMessaging.instance;
+
+    // Request permissions for iOS; no-op on other platforms
+    NotificationSettings settings = await _messaging.requestPermission(
+      alert: true,
+      badge: true,
+      sound: true,
+    );
+
+    print('User granted permission: ${settings.authorizationStatus}');
+
+    // Handle foreground messages
+    FirebaseMessaging.onMessage.listen((RemoteMessage message) {
+      print("Received a message while in the foreground!");
+      // Here, handle your notification and show a local notification if necessary
+    });
+
+    // Handle message taps
+    FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
+      print("A message was opened!");
+      // Navigate to the appropriate screen based on message
+    });
+  }
 
   loadAccounts() {
     _accountDao.find().then((value) {
@@ -125,6 +155,24 @@ class _PaymentForm extends State<PaymentForm> {
     }
   }
 
+  void showSimpleTextNotification(String message, BuildContext context) {
+    InAppNotification.show(
+      context: context,
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: Colors.blue, // or any color you want
+          borderRadius: BorderRadius.circular(16),
+        ),
+        child: Text(
+          message,
+          style: const TextStyle(color: Colors.white),
+        ),
+      ),
+      duration: const Duration(milliseconds: 9000),
+    );
+  }
+
   void handleSaveTransaction(context) async {
     Payment payment = Payment(
         id: _id,
@@ -139,14 +187,36 @@ class _PaymentForm extends State<PaymentForm> {
     if (widget.onClose != null) {
       widget.onClose!(payment);
     }
+
+    if (_account != null) {
+      int accountId =
+          _account?.id ?? 0; // default to 0 or some other default ID
+      double latestBalance = await _accountDao.getBalance(accountId);
+      double accountGoal = _account!.goal ?? 0.0;
+      if (latestBalance >= accountGoal) {
+        showSimpleTextNotification(
+            " Congrats! You have reach your goal for this account ${_account!.accountNumber}",
+            context);
+      }
+    }
     Navigator.of(context).pop();
     globalEvent.emit("payment_update");
     globalEvent.emit("account_update");
   }
 
+  Future<void> sendFirebaseMessage(Account account) async {
+    // You'd need to set up the server part to send messages or use Firebase Console
+    // This is typically a backend task where you send a request to FCM API with the proper payload
+    print("Sending Firebase Message for account: ${account.name}");
+
+    // Your logic to send message goes here
+    // Usually involves calling your backend or Firebase Functions
+  }
+
   @override
   void initState() {
     super.initState();
+    setupFirebaseNotifications();
     populateState();
     _accountEventListener = globalEvent.on("account_update", (data) {
       debugPrint("accounts are changed");
