@@ -365,7 +365,7 @@ class _AccountsScreenState extends State<AccountsScreen> {
                               return AlertDialog(
                                 title: const Text('Monthly Savings Needed'),
                                 content: Text(
-                                    'To reach your goal by the end of the year, you should save $monthlySavings per month.'),
+                                    'To reach your goal by the end of the year, you should save \$${monthlySavings.toStringAsFixed(2)} per month.'),
                                 actions: <Widget>[
                                   TextButton(
                                     child: const Text('Close'),
